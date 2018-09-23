@@ -1,5 +1,6 @@
 package com.pocnative.bonfim.pocnativeandroid.auth
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 
 class AuthManager {
@@ -20,7 +21,8 @@ class AuthManager {
                 if (it.isSuccessful){
                     successCallback()
                 } else{
-                    errorCallback?.invoke() ?: throw NullPointerException("no callback for anonymous login")
+                    Log.d("AuthManager", it.exception.toString())
+                    errorCallback?.invoke() ?: throw NullPointerException(it.exception.toString())
                 }
             }
         }

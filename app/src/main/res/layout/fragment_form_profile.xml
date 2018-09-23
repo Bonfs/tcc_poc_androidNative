@@ -22,7 +22,8 @@
             android:id="@+id/etWeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Weight (Kg)" />
+            android:hint="Weight (Kg)"
+            android:inputType="number|numberSigned|numberDecimal" />
 
     </android.support.design.widget.TextInputLayout>
 
@@ -41,7 +42,8 @@
             android:id="@+id/etHeight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Height (cm)" />
+            android:hint="Height (cm)"
+            android:inputType="number|numberSigned|numberDecimal" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -59,7 +61,8 @@
             android:id="@+id/etAge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Age" />
+            android:hint="Age"
+            android:inputType="number|numberSigned|numberDecimal" />
     </android.support.design.widget.TextInputLayout>
 
     <Spinner

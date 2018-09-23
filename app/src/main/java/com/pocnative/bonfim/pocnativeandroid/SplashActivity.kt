@@ -4,6 +4,9 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
+import com.pocnative.bonfim.pocnativeandroid.auth.AuthManager
 import com.pocnative.bonfim.pocnativeandroid.profile.ProfileActivity
 import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
 
@@ -15,17 +18,28 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
     }
 
     override fun onStart() {
         super.onStart()
 
         Handler().postDelayed({
-            val intent = Intent(this, ProfileActivity::class.java)
-            val bundle = Bundle()
-            bundle.putBoolean("firstLogin", true)
-            intent.putExtras(bundle)
-            this.toActivity(ProfileActivity::class.java, intent)
+            if (AuthManager.isLogged()){
+                this.toActivity(MainActivity::class.java)
+            } else{
+                AuthManager.createAnonymousUser({
+                    val intent = Intent(this, ProfileActivity::class.java)
+                    val bundle = Bundle()
+                    bundle.putBoolean("firstLogin", true)
+                    intent.putExtras(bundle)
+                    this.toActivity(ProfileActivity::class.java, intent)
+                },
+                {
+                    Log.d(TAG, "deu ruim")
+                })
+
+            }
         }, SPLASH_TIME_OUT)
     }
 }
