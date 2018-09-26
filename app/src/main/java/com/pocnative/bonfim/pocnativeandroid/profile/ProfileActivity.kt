@@ -1,10 +1,9 @@
 package com.pocnative.bonfim.pocnativeandroid.profile
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.pocnative.bonfim.pocnativeandroid.R
 import com.pocnative.bonfim.pocnativeandroid.profile.fragments.FormProfileFragment
-import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ProfileActivity : AppCompatActivity() {

@@ -2,22 +2,21 @@ package com.pocnative.bonfim.pocnativeandroid.profile.fragments
 
 
 import android.os.Bundle
-import android.support.design.widget.TextInputEditText
-import android.support.v4.app.Fragment
+import com.google.android.material.textfield.TextInputEditText
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Spinner
+import androidx.appcompat.app.AppCompatActivity
 import com.pocnative.bonfim.pocnativeandroid.MainActivity
 import com.pocnative.bonfim.pocnativeandroid.R
 import com.pocnative.bonfim.pocnativeandroid.profile.dao.createUserProfile
 import com.pocnative.bonfim.pocnativeandroid.profile.model.Gender
 import com.pocnative.bonfim.pocnativeandroid.profile.model.User
 import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
-import kotlinx.android.synthetic.main.fragment_form_profile.*
 
-class FormProfileFragment : Fragment() {
+class FormProfileFragment : androidx.fragment.app.Fragment() {
 
     var showButtonContinue = true
 
@@ -36,7 +35,9 @@ class FormProfileFragment : Fragment() {
             val newUser = User(weight, height, age, gender)
 
             createUserProfile(newUser) {
-                this.activity?.toActivity(MainActivity::class.java)
+                //this.activity?.toActivity(MainActivity::class.java)
+                val appCompatActivity = this.activity as AppCompatActivity
+                appCompatActivity.toActivity(MainActivity::class.java)
             }
 
         }
