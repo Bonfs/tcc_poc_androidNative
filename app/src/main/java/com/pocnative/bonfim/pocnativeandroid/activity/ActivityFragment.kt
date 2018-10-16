@@ -57,11 +57,14 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
             this.map = map
             if(mLocationPermissionGranted){
                 getDeviceLocation()
-            }
-            map.setOnMyLocationChangeListener{
-                val currentUserPosition = LatLng(it.latitude, it.longitude)
-                this.map.addMarker(MarkerOptions().position(currentUserPosition).title("You"))
-                this.map.moveCamera(CameraUpdateFactory.newLatLng(currentUserPosition))
+
+                if(ActivityCompat.checkSelfPermission(context!!, FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context!!, COURSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                    return
+                }
+
+                this.map.isMyLocationEnabled = true
+                //this.map.uiSettings.isMyLocationButtonEnabled = false
             }
         }
     }
@@ -108,7 +111,7 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
     }
 
     fun moveCamera(currentUserPosition: LatLng, zoom: Float = DEFAULT_ZOOM){
-        this.map.addMarker(MarkerOptions().position(currentUserPosition).title("User Position"))
+        //this.map.addMarker(MarkerOptions().position(currentUserPosition).title("User Position"))
         this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserPosition, zoom))
     }
 
