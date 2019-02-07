@@ -21,7 +21,7 @@ import com.pocnative.bonfim.pocnativeandroid.R
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import com.pocnative.bonfim.pocnativeandroid.Manifest
+// import com.pocnative.bonfim.pocnativeandroid.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.location.Location
@@ -47,7 +47,7 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
         return view
     }
 
-    fun initMap(){
+    private fun initMap(){
         val mapFragment: SupportMapFragment = childFragmentManager?.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }

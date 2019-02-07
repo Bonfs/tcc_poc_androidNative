@@ -27,8 +27,10 @@ class SplashActivity : AppCompatActivity() {
         Handler().postDelayed({
             if (AuthManager.isLogged()){
                 this.toActivity(MainActivity::class.java)
+                Log.d(TAG, "main activity")
             } else{
                 AuthManager.createAnonymousUser({
+                    Log.d(TAG, "profile activity")
                     val intent = Intent(this, ProfileActivity::class.java)
                     val bundle = Bundle()
                     bundle.putBoolean("firstLogin", true)
