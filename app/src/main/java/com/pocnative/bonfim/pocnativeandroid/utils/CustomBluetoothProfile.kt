@@ -2,7 +2,7 @@ package com.pocnative.bonfim.pocnativeandroid.utils
 
 import java.util.UUID;
 
-class BluetoothProfile {
+class CustomBluetoothProfile {
     class Basic {
         val service = UUID.fromString("0000fee0-0000-1000-8000-00805f9b34fb")
         val batteryCharacteristic = UUID.fromString("00000006-0000-3512-2118-0009af100700")
@@ -22,5 +22,6 @@ class BluetoothProfile {
 
     class Pedometer {
         var service = UUID.fromString("00000007-0000-1000-8000-00805f9b34fb")
+        var characteristicSteps = UUID.fromString("00000007-0000-1000-8000-00805f9b34fb")
     }
 }
