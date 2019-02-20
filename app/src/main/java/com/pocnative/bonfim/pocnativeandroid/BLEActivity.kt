@@ -13,6 +13,8 @@ import android.bluetooth.BluetoothGattCharacteristic
 import com.pocnative.bonfim.pocnativeandroid.utils.CustomBluetoothProfile
 import java.util.*
 import android.widget.Toast
+import com.pocnative.bonfim.pocnativeandroid.models.HeartRate
+import com.pocnative.bonfim.pocnativeandroid.models.Pedometer
 
 
 class BLEActivity : AppCompatActivity() {
@@ -82,12 +84,18 @@ class BLEActivity : AppCompatActivity() {
     }
 
     fun getSteps() {
-        tvByte.text = "..."
-        val bchar = bluetoothGatt.getService(CustomBluetoothProfile.Basic().service)
-                .getCharacteristic(CustomBluetoothProfile.Pedometer().characteristicSteps)
-        if (!bluetoothGatt.readCharacteristic(bchar)) {
-            Toast.makeText(this, "Failed get pedometer info", Toast.LENGTH_SHORT).show()
+        try {
+            tvByte.text = "..."
+            val bchar: BluetoothGattCharacteristic = bluetoothGatt.getService(CustomBluetoothProfile.Basic().service)
+                    .getCharacteristic(CustomBluetoothProfile.Pedometer().characteristicSteps)
+            // The characteristic can be read in BluetoothGattCallback.onCharacteristicRead...
+            if (!bluetoothGatt.readCharacteristic(bchar)) {
+                Toast.makeText(this, "Failed get pedometer info", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.d("getSteps", e.message)
         }
+
     }
 
     fun getBatteryStatus() {
@@ -122,6 +130,18 @@ class BLEActivity : AppCompatActivity() {
             super.onCharacteristicRead(gatt, characteristic, status)
             Log.v("test", "onCharacteristicRead")
             val data = characteristic.value
+            Log.d("onCharacteristicRead", characteristic.uuid.toString())
+            if (characteristic.uuid == CustomBluetoothProfile.Pedometer().characteristicSteps) {
+                Log.d("onCharacteristicRead", "pedometer")
+                val steps = Pedometer(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1).toInt())
+
+                if (data.size >= 8) steps.distance = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 5).toInt()
+                if (data.size >= 12) steps.calories = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 9).toInt()
+                tvByte.text = "Pedometer: ${steps.steps}"
+            } else if (characteristic.uuid.toString() == "00000006-0000-3512-2118-0009af100700") {
+                Log.d("onCharacteristicRead", "battery")
+            }
+
             tvByte.text = Arrays.toString(data)
         }
 
@@ -133,8 +153,15 @@ class BLEActivity : AppCompatActivity() {
         override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             super.onCharacteristicChanged(gatt, characteristic)
             Log.v("test", "onCharacteristicChanged")
-            val data = characteristic.value
-            tvByte.text = Arrays.toString(data)
+            if (characteristic.uuid.toString() == "00002a37-0000-1000-8000-00805f9b34fb") {
+                Log.d("onCharacteristicChanged", "heart rate")
+                val data = characteristic.value
+                val heartRate = HeartRate(data[1].toInt())
+                tvByte.text = "Frequence: ${heartRate.rate}"
+            } else {
+                val data = characteristic.value
+                tvByte.text = Arrays.toString(data)
+            }
         }
 
         override fun onDescriptorRead(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int) {

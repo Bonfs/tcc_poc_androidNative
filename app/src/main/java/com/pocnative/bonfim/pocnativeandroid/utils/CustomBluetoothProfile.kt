@@ -21,7 +21,6 @@ class CustomBluetoothProfile {
     }
 
     class Pedometer {
-        var service = UUID.fromString("00000007-0000-1000-8000-00805f9b34fb")
-        var characteristicSteps = UUID.fromString("00000007-0000-1000-8000-00805f9b34fb")
+        var characteristicSteps = UUID.fromString("00000007-0000-3512-2118-0009af100700")
     }
 }
