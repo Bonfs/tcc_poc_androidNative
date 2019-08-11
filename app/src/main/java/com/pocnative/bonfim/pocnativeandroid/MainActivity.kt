@@ -31,9 +31,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             R.id.activity -> {
                 ActivityFragment()
             }
-            R.id.goals -> {
-                GoalsFragment()
-            }
+//            R.id.goals -> {
+//                GoalsFragment()
+//            }
             else -> {
                 ActivityFragment()
             }
