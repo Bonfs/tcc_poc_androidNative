@@ -13,4 +13,5 @@
     </string-array>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_ble">BLEActivity</string>
+    <string name="title_activity_pa">PAActivity</string>
 </resources>

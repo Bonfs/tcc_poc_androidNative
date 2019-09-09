@@ -1,11 +1,8 @@
 package com.pocnative.bonfim.pocnativeandroid.activity
 
-
-import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,20 +11,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-
-
 import com.pocnative.bonfim.pocnativeandroid.R
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-// import com.pocnative.bonfim.pocnativeandroid.Manifest
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.location.Location
+import android.widget.Button
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.Task
+import com.pocnative.bonfim.pocnativeandroid.PAActivity
+import kotlinx.android.synthetic.main.fragment_activity.*
 
 
 class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
@@ -43,19 +36,23 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_activity, container, false)
+        view.findViewById<Button>(R.id.btnStart).setOnClickListener {
+            val intent = Intent(context, PAActivity::class.java)
+            activity?.startActivity(intent)
+        }
         getLocationPermission()
         return view
     }
 
-    private fun initMap(){
-        val mapFragment: SupportMapFragment = childFragmentManager?.findFragmentById(R.id.map) as SupportMapFragment
+    private fun initMap() {
+        val mapFragment: SupportMapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
     override fun onMapReady(map: GoogleMap?) {
         if(map != null){
             this.map = map
-            if(mLocationPermissionGranted){
+            if(mLocationPermissionGranted) {
                 getDeviceLocation()
 
                 if(ActivityCompat.checkSelfPermission(context!!, FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -64,7 +61,6 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
                 }
 
                 this.map.isMyLocationEnabled = true
-                //this.map.uiSettings.isMyLocationButtonEnabled = false
             }
         }
     }
@@ -77,11 +73,11 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
          */
         val permissions = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
-        if( ContextCompat.checkSelfPermission(context!!, FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED ){
-            if( ContextCompat.checkSelfPermission(context!!, COURSE_LOCATION ) == PackageManager.PERMISSION_GRANTED ){
+        if(ContextCompat.checkSelfPermission(context!!, FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if(ContextCompat.checkSelfPermission(context!!, COURSE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionGranted = true
                 initMap()
-            } else{
+            } else {
                 ActivityCompat.requestPermissions(requireActivity(), permissions, LOCATION_PERMISSION_REQUEST_CODE)
             }
         } else{
@@ -90,7 +86,7 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
     }
 
 
-    private fun getDeviceLocation(){
+    private fun getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         try{
@@ -107,11 +103,9 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
             Log.e("deviceLocation", e.message)
 
         }
-
     }
 
-    fun moveCamera(currentUserPosition: LatLng, zoom: Float = DEFAULT_ZOOM){
-        //this.map.addMarker(MarkerOptions().position(currentUserPosition).title("User Position"))
+    private fun moveCamera(currentUserPosition: LatLng, zoom: Float = DEFAULT_ZOOM) {
         this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserPosition, zoom))
     }
 
