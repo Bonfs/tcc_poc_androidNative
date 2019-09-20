@@ -19,20 +19,23 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_pa.*
 
 class PAActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var map: GoogleMap
-    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private var mLocationPermissionGranted = false
     private val FINE_LOCATION: String = android.Manifest.permission.ACCESS_FINE_LOCATION
     private val COURSE_LOCATION: String = android.Manifest.permission.ACCESS_COARSE_LOCATION
     private val LOCATION_PERMISSION_REQUEST_CODE = 1234
     private val DEFAULT_ZOOM = 15f
 
+    private lateinit var map: GoogleMap
+    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+    private var isRunning = false
+    private var started = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pa)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
+//        setSupportActionBar(toolbar)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        supportActionBar?.setDisplayShowHomeEnabled(true)
 
         getLocationPermission()
     }
@@ -47,8 +50,7 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
             map = googleMap
             if (mLocationPermissionGranted) {
                 getDeviceLocation()
-
-                    this.map.isMyLocationEnabled = true
+                this.map.isMyLocationEnabled = true
             }
         }
     }
@@ -94,7 +96,7 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE)
             }
-        } else{
+        } else {
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE)
         }
     }
@@ -114,12 +116,11 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         } catch (e: SecurityException){
             Log.e("deviceLocation", e.message)
-
+            e.printStackTrace()
         }
     }
 
     private fun moveCamera(currentUserPosition: LatLng, zoom: Float = DEFAULT_ZOOM) {
-        //this.map.addMarker(MarkerOptions().position(currentUserPosition).title("User Position"))
         this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserPosition, zoom))
     }
 }

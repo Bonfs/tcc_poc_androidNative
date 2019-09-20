@@ -6,8 +6,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.fragment.app.Fragment
 import android.view.MenuItem
 import com.pocnative.bonfim.pocnativeandroid.activity.ActivityFragment
-import com.pocnative.bonfim.pocnativeandroid.goals.GoalsFragment
-import com.pocnative.bonfim.pocnativeandroid.progress.ProgressFragment
+import com.pocnative.bonfim.pocnativeandroid.historic.HistoricFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -26,15 +25,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         // select item in a bottom menu
         val selectedFragment = when (item.itemId){
             R.id.progress -> {
-                ProgressFragment()
+                HistoricFragment.getInstance()
             }
             R.id.activity -> {
                 ActivityFragment()
-            }
-//            R.id.goals -> {
-//                GoalsFragment()
-//            }
-            else -> {
+            } else -> {
                 ActivityFragment()
             }
         }

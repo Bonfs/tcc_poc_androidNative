@@ -21,7 +21,7 @@ class BLEActivity : AppCompatActivity() {
     lateinit var bluetoothDevice: BluetoothDevice
     lateinit var bluetoothGatt: BluetoothGatt
     private val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-    private var isListeningHeartRate = false;
+    private var isListeningHeartRate = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +65,7 @@ class BLEActivity : AppCompatActivity() {
         tvState.text = "Disconnected"
     }
 
-    fun startScanHeartRate() {
+    private fun startScanHeartRate() {
         tvByte.text = "..."
         val bchar = bluetoothGatt.getService(CustomBluetoothProfile.HeartRate().service)
                 .getCharacteristic(CustomBluetoothProfile.HeartRate().controlCharacteristic)
@@ -73,7 +73,7 @@ class BLEActivity : AppCompatActivity() {
         bluetoothGatt.writeCharacteristic(bchar)
     }
 
-    fun listenHeartRate() {
+    private fun listenHeartRate() {
         val bchar = bluetoothGatt.getService(CustomBluetoothProfile.HeartRate().service)
                 .getCharacteristic(CustomBluetoothProfile.HeartRate().measurementCharacteristic)
         bluetoothGatt.setCharacteristicNotification(bchar, true)
@@ -83,7 +83,7 @@ class BLEActivity : AppCompatActivity() {
         isListeningHeartRate = true
     }
 
-    fun getSteps() {
+    private fun getSteps() {
         try {
             tvByte.text = "..."
             val bchar: BluetoothGattCharacteristic = bluetoothGatt.getService(CustomBluetoothProfile.Basic().service)
@@ -98,7 +98,7 @@ class BLEActivity : AppCompatActivity() {
 
     }
 
-    fun getBatteryStatus() {
+    private fun getBatteryStatus() {
         tvByte.text = "..."
         val bchar = bluetoothGatt.getService(CustomBluetoothProfile.Basic().service)
                 .getCharacteristic(CustomBluetoothProfile.Basic().batteryCharacteristic)
