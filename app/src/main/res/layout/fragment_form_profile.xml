@@ -97,12 +97,11 @@
         android:id="@+id/tvBmiCategory"
         android:layout_width="103dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="NORMAL"
         android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/tvBmi"
-        app:layout_constraintStart_toStartOf="@+id/tvBmi"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBmi" />
 
     <Button
