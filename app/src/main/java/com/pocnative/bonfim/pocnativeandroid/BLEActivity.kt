@@ -134,6 +134,7 @@ class BLEActivity : AppCompatActivity() {
             if (characteristic.uuid == CustomBluetoothProfile.Pedometer().characteristicSteps) {
                 Log.d("onCharacteristicRead", "pedometer")
                 val steps = Pedometer(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1).toInt())
+                Log.d("onCharacteristicRead", steps.steps.toString())
 
                 if (data.size >= 8) steps.distance = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 5).toInt()
                 if (data.size >= 12) steps.calories = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 9).toInt()
