@@ -1,33 +1,44 @@
 package com.pocnative.bonfim.pocnativeandroid
 
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.bluetooth.*
+import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.location.Criteria
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
-import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.pocnative.bonfim.pocnativeandroid.models.HeartRate
 import com.pocnative.bonfim.pocnativeandroid.models.Pedometer
 import com.pocnative.bonfim.pocnativeandroid.utils.CustomBluetoothProfile
 import com.pocnative.bonfim.pocnativeandroid.utils.showToast
-
 import kotlinx.android.synthetic.main.activity_pa.*
-import kotlinx.android.synthetic.main.content_ble.*
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.fixedRateTimer
 
-class PAActivity : AppCompatActivity(), OnMapReadyCallback {
+class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private var mLocationPermissionGranted = false
     private val MIBAND_ADDRESS = "E7:75:2F:8B:C4:98"
     private val FINE_LOCATION: String = android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -46,34 +57,140 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
     private var isConnectedToMiband = false
     private var isListeningHeartRate = false
     private var initialSteps = -1
+    private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val uid = FirebaseAuth.getInstance().currentUser!!.uid
+    private val activityDate = Calendar.getInstance()
+    private val locations: MutableList<Map<String, Any>> = mutableListOf()
+    private lateinit var activityRef: DatabaseReference
+    private lateinit var startLocation: Location
+    private lateinit var fixedRateTimer: Timer
+
+    private var elapsedRealtime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pa)
-//        setSupportActionBar(toolbar)
-//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-//        supportActionBar?.setDisplayShowHomeEnabled(true)
 
         activityIndicator = ProgressDialog(this)
         activityIndicator.setMessage("Connecting to Device...")
         activityIndicator.setCancelable(false)
-//        activityIndicator.show()
 
-        fabPlay.setOnClickListener {
-            if (isConnectedToMiband) {
-                getSteps()
-            } else {
-                Log.v("onCreate", "wait until connect")
-            }
-        }
+        fabPlay.setOnClickListener(::handleStartStop)
 
         getLocationPermission()
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        disconnect()
-        onBackPressed()
-        return true
+    override fun onBackPressed() {
+        AlertDialog.Builder(this)
+                .setTitle("Leave Activity")
+                .setMessage("You wish leave activity?")
+                .setPositiveButton("Yes") { dialog, which ->
+                    try {
+                        val hours: Int =  (elapsedRealtime / 3600000).toInt()
+                        val minutes: Int = ((elapsedRealtime - hours * 3600000) / 60000).toInt()
+                        val seconds: Int = ((elapsedRealtime - hours * 3600000 - minutes * 60000) / 1000).toInt()
+
+                        updateActivity(mapOf("finished" to true, "duration" to seconds))
+                        fixedRateTimer.cancel()
+                        disconnect()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    super.onBackPressed()
+                }
+                .setNegativeButton("No", null)
+                .show()
+    }
+
+    private fun handleStartStop(view: View) {
+        /**
+         * if (isConnectedToMiband) {
+                getSteps()
+            } else {
+                Log.v("onCreate", "wait until connect")
+            }
+         */
+        if (!isRunning) {
+            if (started) {
+                chronometer.base = SystemClock.elapsedRealtime() - elapsedRealtime
+                fixedRateTimer = fixedRateTimer(name = "hello-timer", initialDelay = 100, period = 2000) {
+                    Log.d("hello-timer", "step count")
+                    getSteps()
+                }
+            } else
+                chronometer.base = SystemClock.elapsedRealtime()
+            chronometer.start()
+            fabPlay.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.wrong))
+            fabPlay.supportBackgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.wrong))
+            fabPlay.setImageResource(R.drawable.ic_pause)
+        } else {
+            fixedRateTimer.cancel()
+            elapsedRealtime = SystemClock.elapsedRealtime() - chronometer.base
+            /*val hours: Int =  (elapsedRealtime / 3600000).toInt()
+            val minutes: Int = ((elapsedRealtime - hours * 3600000) / 60000).toInt()
+            val seconds: Int = ((elapsedRealtime - hours * 3600000 - minutes * 60000) / 1000).toInt()
+            Log.d("chronometer.base", seconds.toString())*/
+            chronometer.stop()
+            fabPlay.backgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.right))
+            fabPlay.supportBackgroundTintList = ColorStateList.valueOf(resources.getColor(R.color.right))
+            fabPlay.setImageResource(R.drawable.ic_play)
+        }
+
+        if (started) {
+            this.isRunning = !this.isRunning
+        } else {
+            startActivity()
+            this.isRunning = !this.isRunning
+            this.started = true
+        }
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun startActivity() {
+        this.activityRef = this.database.getReference("debug/users/${uid}/activities").push()
+
+        val date = this.activityDate.time
+        val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss")
+        this.activityRef.setValue(mapOf(
+            "started" to this.started,
+            "finished" to false,
+            "duration" to elapsedRealtime,
+            "date" to dateFormat.format(date),
+            "locations" to locations,
+            "startPosition" to mapOf("latitude" to this.startLocation.latitude, "longitude" to this.startLocation.longitude)
+        )).addOnCompleteListener {
+            if (it.isSuccessful) {
+                // TODO start step counter
+                fixedRateTimer = fixedRateTimer(name = "hello-timer", initialDelay = 100, period = 2000) {
+                    Log.d("hello-timer", "step count")
+                    getSteps()
+                }
+            }
+        }
+    }
+
+    private fun updateActivity(updatedValues: Map<String, Any>) = this.activityRef.updateChildren(updatedValues)
+
+    override fun onLocationChanged(location: Location?) {
+        if (mLocationPermissionGranted && location !== null) {
+            moveCamera(LatLng(location.latitude, location.longitude))
+            if (started && isRunning) {
+                locations.add(mapOf("latitude" to location.latitude, "longitude" to location.longitude))
+                updateActivity(mapOf("locations" to locations))
+            }
+        }
+    }
+
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+        // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onProviderEnabled(provider: String?) {
+        // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onProviderDisabled(provider: String?) {
+        // TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onMapReady(googleMap: GoogleMap?) {
@@ -86,6 +203,9 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Requisita permissão de localização para o usuário
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -119,8 +239,10 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun hasConnected() {
         bluetoothGatt.discoverServices()
         isConnectedToMiband = true
-        // this.activityIndicator.hide()
-//        getSteps()
+        /*runOnUiThread {
+            this.activityIndicator.hide()
+        }*/
+        // getSteps()
         Log.d("hasConnected", "Connected to Miband")
 //        this.showToast("Connected to Miband")
     }
@@ -143,6 +265,9 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * inicia o mapa
+     */
     private fun initMap() {
         val mapFragment: SupportMapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -174,14 +299,28 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        val criteria = Criteria()
+        criteria.accuracy = Criteria.ACCURACY_COARSE
+        criteria.powerRequirement = Criteria.POWER_HIGH
+        criteria.isAltitudeRequired = false
+        criteria.isBearingRequired = false
 
+        val locationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val provider = locationManager.getBestProvider(criteria, true)
         try {
             if(mLocationPermissionGranted) {
+                locationManager.requestLocationUpdates(provider, 1L, 5f, this)
+                /*locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1L, 1f, this)
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1L, 1f, this)*/
+
                 val location = mFusedLocationProviderClient.lastLocation
+                // val location: Location = locationManager.getLastKnownLocation()
                 location.addOnCompleteListener {
                     if(it.isSuccessful) {
                         val currentLocation: Location = it.result as Location
-                         moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude))
+                        this.startLocation = currentLocation
+                        moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude))
                     }
                 }
             }
@@ -192,7 +331,8 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun moveCamera(currentUserPosition: LatLng, zoom: Float = DEFAULT_ZOOM) {
-        this.map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserPosition, zoom))
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentUserPosition, zoom)
+        this.map.animateCamera(cameraUpdate)
     }
 
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
@@ -221,7 +361,19 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback {
             if (characteristic.uuid == CustomBluetoothProfile.Pedometer().characteristicSteps) {
                 Log.d("onCharacteristicRead", "pedometer")
                 val steps = Pedometer(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 1).toInt())
-                Log.d("onCharacteristicRead", steps.steps.toString())
+                if (initialSteps == -1)
+                    initialSteps = steps.steps
+
+                val currentSteps = steps.steps - initialSteps
+
+                runOnUiThread {
+                    tvSteps.text = currentSteps.toString()
+                }
+
+                updateActivity(mapOf("steps" to currentSteps))
+
+
+                Log.d("onCharacteristicRead", currentSteps.toString())
 
                 if (data.size >= 8) steps.distance = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 5).toInt()
                 if (data.size >= 12) steps.calories = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 9).toInt()
