@@ -36,6 +36,7 @@ import com.pocnative.bonfim.pocnativeandroid.utils.showToast
 import kotlinx.android.synthetic.main.activity_pa.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.concurrent.fixedRateTimer
 
 class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
@@ -60,7 +61,7 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val uid = FirebaseAuth.getInstance().currentUser!!.uid
     private val activityDate = Calendar.getInstance()
-    private val locations: MutableList<Map<String, Any>> = mutableListOf()
+    private val locations: ArrayList<Map<String, Double>> = arrayListOf()
     private lateinit var activityRef: DatabaseReference
     private lateinit var startLocation: Location
     private lateinit var fixedRateTimer: Timer
@@ -177,8 +178,33 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
             if (started && isRunning) {
                 locations.add(mapOf("latitude" to location.latitude, "longitude" to location.longitude))
                 updateActivity(mapOf("locations" to locations))
+                tvDistance.text = "${String.format("%.2f", calcDistance())} KM"
             }
         }
+    }
+
+    private fun calcDistance(): Double {
+        var distance = 0.0
+        if (locations.size == 0) return distance
+
+        for ((index, value) in locations.withIndex()) {
+            if(index + 1 < locations.size ) {
+                val start = Location("")
+                val dest = Location("")
+
+                start.latitude = value["latitude"] ?: error("")
+                start.longitude = value["longitude"] ?: error("")
+
+                dest.latitude = locations[index+1]["latitude"] ?: error("")
+                dest.longitude = locations[index+1]["longitude"] ?: error("")
+
+
+                distance += start.distanceTo(dest)
+            }
+        }
+
+        Log.d("calcDistance", (distance / 1000).toString())
+        return distance / 1000
     }
 
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
@@ -320,6 +346,7 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     if(it.isSuccessful) {
                         val currentLocation: Location = it.result as Location
                         this.startLocation = currentLocation
+                        locations.add(mapOf("latitude" to currentLocation.latitude, "longitude" to currentLocation.longitude))
                         moveCamera(LatLng(currentLocation.latitude, currentLocation.longitude))
                     }
                 }

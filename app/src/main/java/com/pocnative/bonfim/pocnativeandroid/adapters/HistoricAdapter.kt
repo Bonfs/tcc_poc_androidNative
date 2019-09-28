@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pocnative.bonfim.pocnativeandroid.R
+import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
 
-class HistoricAdapter(private val historic: Array<String>) :
+class HistoricAdapter(private val historic: ArrayList<PhysicalActivity>) :
         RecyclerView.Adapter<HistoricAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -22,7 +23,7 @@ class HistoricAdapter(private val historic: Array<String>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // TODO("not implemented")
+        holder.tvDuration.text = "Duration: ${historic[position].duration}"
     }
 
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
