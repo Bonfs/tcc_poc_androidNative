@@ -34,7 +34,7 @@ class HistoricFragment : androidx.fragment.app.Fragment() {
         val view = inflater.inflate(R.layout.fragment_historic, container, false)
 
         viewManager = LinearLayoutManager(context)
-        viewAdapter = HistoricAdapter(activities)
+        viewAdapter = HistoricAdapter(activities, context!!)
 
         rvHistoric = view.findViewById<RecyclerView>(R.id.rvHistoric).apply {
             layoutManager = viewManager

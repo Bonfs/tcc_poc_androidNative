@@ -41,6 +41,8 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:text="Completed on: Sep 17th 19"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline7"
         app:layout_constraintTop_toTopOf="@+id/guideline8" />
 
@@ -65,6 +67,8 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:text="Duration: 60 seconds"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline7"
         app:layout_constraintTop_toBottomOf="@+id/tvDate" />
 </androidx.constraintlayout.widget.ConstraintLayout>

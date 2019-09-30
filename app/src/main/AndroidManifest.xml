@@ -18,14 +18,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".HistoricDetailActivity"></activity>
         <activity
             android:name=".PAActivity"
             android:label="@string/title_activity_pa"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".BLEActivity"
             android:label="@string/title_activity_ble"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".MainActivity" />
         <activity
             android:name=".SplashActivity"
@@ -51,6 +52,7 @@
 
         <activity
             android:name=".MapsActivity"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:label="@string/title_activity_maps" />
     </application>
 
