@@ -45,6 +45,7 @@ class HistoricAdapter(
 
         override fun onClick(v: View) {
             val intent = Intent(context, HistoricDetailActivity::class.java)
+            intent.putExtra("phisycalACtivity", physicalActivity)
             context.startActivity(intent)
         }
 

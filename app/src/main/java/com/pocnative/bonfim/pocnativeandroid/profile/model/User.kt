@@ -4,13 +4,13 @@ import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
-class User(){
+class User() {
     var weight: Long = 0
-    var height: Int = 0
-    var age: Int = 0
+    var height: Long = 0
+    var age: Long = 0
     lateinit var gender: Gender
 
-    constructor(weight: Long, height: Int, age: Int, gender: Gender) : this() {
+    constructor(weight: Long, height: Long, age: Long, gender: Gender) : this() {
         this.weight = weight
         this.height = height
         this.age = age

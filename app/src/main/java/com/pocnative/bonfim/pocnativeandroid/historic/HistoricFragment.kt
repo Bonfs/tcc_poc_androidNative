@@ -47,6 +47,7 @@ class HistoricFragment : androidx.fragment.app.Fragment() {
     }
 
     private fun getPhysicalActivityFromFirebase() {
+        // TODO mudar o tipo de banco para production
         val paRef = database.getReference("debug/users/${uid}/activities")
 
 
@@ -55,7 +56,7 @@ class HistoricFragment : androidx.fragment.app.Fragment() {
                 Log.d("DatabaseError", error.message)
             }
 
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
                 dataSnapshot.children.forEach {
                     Log.d("getPhysicalActivity", "aaaaaaaaaaa")
                     val physicalActivity: PhysicalActivity? = it.getValue(PhysicalActivity::class.java)

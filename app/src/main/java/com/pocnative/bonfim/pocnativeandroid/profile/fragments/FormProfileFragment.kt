@@ -20,7 +20,7 @@ import com.pocnative.bonfim.pocnativeandroid.profile.model.User
 import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
 
 class FormProfileFragment : androidx.fragment.app.Fragment() {
-    var height: Int = 0
+    var height: Long = 0
     var weight: Long = 0
     var showButtonContinue = true
 
@@ -56,7 +56,7 @@ class FormProfileFragment : androidx.fragment.app.Fragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 height = try {
-                    s.toString().toInt()
+                    s.toString().toLong()
                 } catch (e: Exception) {
                     e.printStackTrace()
                     0
@@ -67,7 +67,7 @@ class FormProfileFragment : androidx.fragment.app.Fragment() {
         })
 
         view.findViewById<Button>(R.id.btnContinue).setOnClickListener {
-            val age: Int = view.findViewById<TextInputEditText>(R.id.etAge).text.toString().toInt()
+            val age: Long = view.findViewById<TextInputEditText>(R.id.etAge).text.toString().toLong()
             val gender: Gender = Gender.MALE//Gender.valueOf(view.findViewById<Spinner>(R.id.spnGender).selectedItem.toString())
             val newUser = User(weight, height, age, gender)
 
