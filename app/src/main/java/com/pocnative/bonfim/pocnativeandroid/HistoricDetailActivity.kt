@@ -6,6 +6,13 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -13,9 +20,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
 import com.pocnative.bonfim.pocnativeandroid.profile.model.User
+import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
 import kotlinx.android.synthetic.main.activity_historic_detail.*
 
-class HistoricDetailActivity : AppCompatActivity() {
+class HistoricDetailActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var map: GoogleMap
     private lateinit var physicalActivity: PhysicalActivity
     private lateinit var user: User
     private val uid: String = FirebaseAuth.getInstance().currentUser!!.uid
@@ -49,11 +58,54 @@ class HistoricDetailActivity : AppCompatActivity() {
 
         btnInfo.setOnClickListener {
             val intent = Intent()
+            intent.putExtra("weight", user.weight)
+            this.toActivity(GeneralInfoActivity::class.java, intent)
         }
 
         tvSteps.text = physicalActivity.steps.toString()
         tvDuration.text = "${physicalActivity.duration.toString()} sec"
         tvDistance.text= "${String.format("%.2f", calcDistance())}"
+
+        initMap()
+    }
+
+    override fun onMapReady(map: GoogleMap) {
+        this.map = map
+        if (physicalActivity.locations.isNotEmpty()) {
+            moveCamera(
+                LatLng(physicalActivity.startPosition["latitude"]!!,
+                        physicalActivity.startPosition["longitude"]!!))
+            drawRoute()
+        }
+    }
+
+    private fun initMap() {
+        val mapFragment: SupportMapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
+    private fun moveCamera(positon: LatLng, zoom: Float = 12f) {
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(positon, zoom)
+        this.map.animateCamera(cameraUpdate)
+    }
+
+    private fun drawRoute() {
+        val polyline: Polyline = this.map.addPolyline(
+                PolylineOptions()
+                    .clickable(false)
+                    .addAll(getAllLatLng())
+
+        )
+        polyline.color = resources.getColor(R.color.colorPrimary)
+    }
+
+    private fun getAllLatLng(): ArrayList<LatLng> {
+        val locations: ArrayList<LatLng> = arrayListOf()
+        physicalActivity.locations.forEach{
+            locations.add(LatLng(it["latitude"]!!, it["longitude"]!!))
+        }
+
+        return  locations
     }
 
     private fun calcCalories(): Double {

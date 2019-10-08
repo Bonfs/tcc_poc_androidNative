@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".HistoricDetailActivity"></activity>
+        <activity android:name=".GeneralInfoActivity"></activity>
+        <activity android:name=".HistoricDetailActivity" />
         <activity
             android:name=".PAActivity"
             android:label="@string/title_activity_pa"
@@ -52,8 +53,8 @@
 
         <activity
             android:name=".MapsActivity"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
     </application>
 
 </manifest>
