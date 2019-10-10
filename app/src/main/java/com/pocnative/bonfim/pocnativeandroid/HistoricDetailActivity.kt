@@ -57,9 +57,9 @@ class HistoricDetailActivity : AppCompatActivity(), OnMapReadyCallback {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         btnInfo.setOnClickListener {
-            val intent = Intent()
+            val intent = Intent(this, GeneralInfoActivity::class.java)
             intent.putExtra("weight", user.weight)
-            this.toActivity(GeneralInfoActivity::class.java, intent)
+            startActivity(intent)
         }
 
         tvSteps.text = physicalActivity.steps.toString()
