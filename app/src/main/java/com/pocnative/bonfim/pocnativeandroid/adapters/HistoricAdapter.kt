@@ -11,6 +11,9 @@ import com.pocnative.bonfim.pocnativeandroid.HistoricDetailActivity
 import com.pocnative.bonfim.pocnativeandroid.R
 import com.pocnative.bonfim.pocnativeandroid.historic.HistoricFragment
 import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class HistoricAdapter(
         private val historic: ArrayList<PhysicalActivity>,
@@ -31,7 +34,12 @@ class HistoricAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindPhysicalActivity(historic[position])
         holder.tvDuration.text = "Duration: ${historic[position].duration}"
-        holder.tvDate.text = "Completed on: ${historic[position].date}"
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.US)
+        val viewDateFormat = SimpleDateFormat("MMMM dd, YYYY", Locale.US)
+        calendar.time = dateFormat.parse(historic[position].date)
+        holder.tvDate.text = "Completed on: ${viewDateFormat.format(calendar.time)}"
     }
 
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView), View.OnClickListener {

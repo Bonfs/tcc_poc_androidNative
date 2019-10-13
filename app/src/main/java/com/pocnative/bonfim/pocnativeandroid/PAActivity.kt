@@ -151,7 +151,7 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
         this.activityRef = this.database.getReference("debug/users/${uid}/activities").push()
 
         val date = this.activityDate.time
-        val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss")
+        val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.US)
         this.activityRef.setValue(mapOf(
             "started" to this.started,
             "finished" to false,

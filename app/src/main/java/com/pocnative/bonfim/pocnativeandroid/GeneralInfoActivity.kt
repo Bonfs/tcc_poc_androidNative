@@ -12,20 +12,17 @@ import com.google.firebase.database.ValueEventListener
 import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
 import kotlinx.android.synthetic.main.activity_general_info.*
 import kotlinx.android.synthetic.main.activity_historic_detail.toolbar
-import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.pocnative.bonfim.pocnativeandroid.models.ChartType
 
 
 class GeneralInfoActivity : AppCompatActivity() {
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val uid: String = FirebaseAuth.getInstance().currentUser!!.uid
     private val physicalActivities: ArrayList<PhysicalActivity> = arrayListOf()
-    private val barEntries: ArrayList<BarEntry> = arrayListOf()
-    private val title: String = "Steps"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +40,22 @@ class GeneralInfoActivity : AppCompatActivity() {
         chart.setPinchZoom(false)
         chart.setDrawGridBackground(true)
         chart.description.isEnabled = false
+
+        stepsContainer.setOnClickListener {
+            setChart(ChartType.STEPS)
+        }
+
+        durationContainer.setOnClickListener {
+            setChart(ChartType.DURATION)
+        }
+
+        caloriesContainer.setOnClickListener {
+            setChart(ChartType.CALORIES)
+        }
+
+        distanceContainer.setOnClickListener {
+            setChart(ChartType.DISTANCE)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -52,7 +65,6 @@ class GeneralInfoActivity : AppCompatActivity() {
 
     private fun getPhysicalActivitiesFromFB() {
         val paRef = database.getReference("debug/users/${uid}/activities")
-
 
         paRef.addValueEventListener(object: ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -67,9 +79,58 @@ class GeneralInfoActivity : AppCompatActivity() {
                 }
 
                 Log.d("GeneralInfoActivity", physicalActivities.size.toString())
-                setChart()
+                setChart(ChartType.STEPS)
             }
         })
+    }
+
+    private fun setChart(type: ChartType) {
+        tvTitle.text = type.toString()
+        toolbar.title = type.toString().capitalize()
+        val barEntries: ArrayList<BarEntry> = arrayListOf()
+        when (type) {
+            ChartType.STEPS -> {
+                var cont = 1F
+                physicalActivities.forEach {
+                    barEntries.add(BarEntry(cont, it.steps.toFloat()))
+                    cont++
+                }
+            }
+            ChartType.DURATION -> {
+                var cont = 1F
+                physicalActivities.forEach {
+                    barEntries.add(BarEntry(cont, it.duration.toFloat()))
+                    cont++
+                }
+            }
+            ChartType.CALORIES -> {
+                var cont = 1f
+                physicalActivities.forEach {
+                    barEntries.add(BarEntry(cont, calcCalories(it.duration).toFloat()))
+                    cont++
+                }
+            }
+            ChartType.DISTANCE -> {
+                var cont = 1f
+                physicalActivities.forEach {
+                    barEntries.add(BarEntry(cont, calcDistance(it.locations).toFloat()))
+                    cont++
+                }
+            }
+        }
+
+        val barDataSet: BarDataSet = BarDataSet(barEntries, type.toString().capitalize())
+        barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
+        val barData = BarData(barDataSet)
+        barData.barWidth = 0.5f
+        chart.data = barData
+        chart.invalidate()
+        /*val days: Array<String> = arrayOf("03/09", "04/09", "05/09", "06/09", "07/09", "08/09", "09/09", "10/09", "11/09", "12/09")
+        val xAxisFormatter = MyXAxisFormater(days)
+
+        val xAxis = chart.xAxis
+        xAxis.granularity = 1f
+        xAxis.valueFormatter = xAxisFormatter*/
     }
 
     private fun calcDistance(locations: ArrayList<Map<String, Double>>): Double {
@@ -102,42 +163,5 @@ class GeneralInfoActivity : AppCompatActivity() {
         val caloriesSpent = (0.5 * weight) * durationInMinutes
 
         return caloriesSpent
-    }
-
-    private fun setChart() {
-        barEntries.add(BarEntry(1F, 50F))
-        barEntries.add(BarEntry(2F, 20F))
-        barEntries.add(BarEntry(3F, 30F))
-        barEntries.add(BarEntry(4F, 90F))
-        barEntries.add(BarEntry(5F, 120F))
-        barEntries.add(BarEntry(6F, 90F))
-        barEntries.add(BarEntry(7F, 120F))
-        barEntries.add(BarEntry(8F, 20F))
-        barEntries.add(BarEntry(9F, 30F))
-        barEntries.add(BarEntry(10F, 90F))
-
-        val barDataSet: BarDataSet = BarDataSet(barEntries, title)
-        barDataSet.colors = ColorTemplate.COLORFUL_COLORS.toList()
-
-        val barData = BarData(barDataSet)
-        barData.barWidth = 0.5f
-
-        chart.data = barData
-
-        val days: Array<String> = arrayOf("03/09", "04/09", "05/09", "06/09", "07/09", "08/09", "09/09", "10/09", "11/09", "12/09")
-        val xAxisFormatter = MyXAxisFormater(days)
-
-        val xAxis = chart.xAxis
-        xAxis.granularity = 1f
-        xAxis.valueFormatter = xAxisFormatter
-
-        // val mv =
-    }
-
-    inner class MyXAxisFormater(var values: Array<String>) : ValueFormatter() {
-        override fun getFormattedValue(index: Float, axis: AxisBase?): String {
-            return values[index.toInt()].toString()
-        }
-
     }
 }

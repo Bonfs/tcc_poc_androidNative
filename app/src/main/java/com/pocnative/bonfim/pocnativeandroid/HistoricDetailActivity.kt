@@ -22,6 +22,9 @@ import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
 import com.pocnative.bonfim.pocnativeandroid.profile.model.User
 import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
 import kotlinx.android.synthetic.main.activity_historic_detail.*
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class HistoricDetailActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
@@ -62,7 +65,15 @@ class HistoricDetailActivity : AppCompatActivity(), OnMapReadyCallback {
             startActivity(intent)
         }
 
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.US)
+        calendar.time = dateFormat.parse(physicalActivity.date)
+        val viewDateFormat = SimpleDateFormat("MMMM dd, YYYY", Locale.US)
+
+
         tvSteps.text = physicalActivity.steps.toString()
+        tvDate.text = viewDateFormat.format(calendar.time)
+
         tvDuration.text = "${physicalActivity.duration.toString()} sec"
         tvDistance.text= "${String.format("%.2f", calcDistance())}"
 
