@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -283,7 +284,11 @@ class PAActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener {
                     .getCharacteristic(CustomBluetoothProfile.Pedometer().characteristicSteps)
             // The characteristic can be read in BluetoothGattCallback.onCharacteristicRead...
             if (!bluetoothGatt.readCharacteristic(bchar)) {
-                this.showToast("Failed get pedometer info")
+                // this.showToast("Failed get pedometer info")
+                runOnUiThread {
+                    val toast = Toast.makeText(baseContext, "Failed get pedometer info", Toast.LENGTH_LONG)
+                    toast.show()
+                }
             }
         } catch (e: Exception) {
             Log.d("getSteps", e.message)

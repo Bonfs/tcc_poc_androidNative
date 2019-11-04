@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener
 import com.pocnative.bonfim.pocnativeandroid.R
 import com.pocnative.bonfim.pocnativeandroid.adapters.HistoricAdapter
 import com.pocnative.bonfim.pocnativeandroid.models.PhysicalActivity
+import kotlinx.android.synthetic.main.fragment_historic.*
 
 class HistoricFragment : androidx.fragment.app.Fragment() {
     private lateinit var rvHistoric: RecyclerView
@@ -57,14 +58,16 @@ class HistoricFragment : androidx.fragment.app.Fragment() {
             }
 
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                dataSnapshot.children.forEach {
-                    Log.d("getPhysicalActivity", "aaaaaaaaaaa")
-                    val physicalActivity: PhysicalActivity? = it.getValue(PhysicalActivity::class.java)
+                    activities.clear()
+                    dataSnapshot.children.forEach {
+                        Log.d("getPhysicalActivity", "aaaaaaaaaaa")
+                        val physicalActivity: PhysicalActivity? = it.getValue(PhysicalActivity::class.java)
 
-                    if (physicalActivity !== null) activities.add(physicalActivity)
+                        if (physicalActivity !== null) activities.add(physicalActivity)
                 }
 
                 viewAdapter.notifyDataSetChanged()
+                if (activities.size == 0) tvEmpty.visibility = View.GONE
             }
         })
     }

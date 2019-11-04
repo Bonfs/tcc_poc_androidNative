@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.pocnative.bonfim.pocnativeandroid.MainActivity
@@ -18,6 +19,9 @@ import com.pocnative.bonfim.pocnativeandroid.profile.dao.createUserProfile
 import com.pocnative.bonfim.pocnativeandroid.profile.model.Gender
 import com.pocnative.bonfim.pocnativeandroid.profile.model.User
 import com.pocnative.bonfim.pocnativeandroid.utils.toActivity
+import android.app.ProgressDialog
+
+
 
 class FormProfileFragment : androidx.fragment.app.Fragment() {
     var height: Long = 0
@@ -63,16 +67,20 @@ class FormProfileFragment : androidx.fragment.app.Fragment() {
                 }
                 calculateBMI()
             }
-
         })
 
         view.findViewById<Button>(R.id.btnContinue).setOnClickListener {
             val age: Long = view.findViewById<TextInputEditText>(R.id.etAge).text.toString().toLong()
-            val gender: Gender = Gender.MALE//Gender.valueOf(view.findViewById<Spinner>(R.id.spnGender).selectedItem.toString())
+            val gender: Gender = if (view.findViewById<Spinner>(R.id.spnGender).selectedItem.toString() === "Male") Gender.MALE else Gender.FEMALE
             val newUser = User(weight, height, age, gender)
+            val mDialog = ProgressDialog(context)
+            mDialog.setMessage("Please wait...")
+            mDialog.setCancelable(false)
+            mDialog.show()
 
             createUserProfile(newUser) {
                 //this.activity?.toActivity(MainActivity::class.java)
+                mDialog.hide()
                 val appCompatActivity = this.activity as AppCompatActivity
                 appCompatActivity.toActivity(MainActivity::class.java)
             }

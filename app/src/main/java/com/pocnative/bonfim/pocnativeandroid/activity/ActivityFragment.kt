@@ -20,7 +20,6 @@ import android.widget.Button
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.pocnative.bonfim.pocnativeandroid.PAActivity
-import kotlinx.android.synthetic.main.fragment_activity.*
 
 
 class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
