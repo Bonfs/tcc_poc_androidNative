@@ -85,6 +85,7 @@ class ActivityFragment : androidx.fragment.app.Fragment(), OnMapReadyCallback {
     }
 
 
+
     private fun getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 

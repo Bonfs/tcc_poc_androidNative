@@ -25,7 +25,7 @@ class SplashActivity : AppCompatActivity() {
         super.onStart()
 
         Handler().postDelayed({
-            if (AuthManager.isLogged()) {
+            if (false/*AuthManager.isLogged()*/) {
                 this.toActivity(MainActivity::class.java)
                 Log.d(TAG, "main activity")
             } else {
